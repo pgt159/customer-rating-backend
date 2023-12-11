@@ -16,16 +16,18 @@ app.use(
 );
 
 app.use(cors());
-app.use('/', (req, res, next) => {
-  res.status(200).json({
-    message: 'Hello world',
-  });
-});
+
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/rating', ratingRouter);
 
 app.use('*', (req, res, next) => {
   next(new AppError(`Can not find ${req.originalUrl} on this server!`, 404));
+});
+
+app.use('/', (req, res, next) => {
+  res.status(200).json({
+    message: 'Hello world',
+  });
 });
 
 app.use(globalErrorHandler);
