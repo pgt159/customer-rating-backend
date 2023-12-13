@@ -3,16 +3,30 @@ class ApiFeatures {
     this.query = query;
     this.queryString = queryString;
   }
+
   filter() {
-    const queryObj = {
+    let queryObj = {
       ...this.queryString,
     };
+    if (queryObj.createdFrom || queryObj.createdTo) {
+      queryObj.createdAt = {
+        gte: queryObj.createdFrom,
+        lt: queryObj.createdTo,
+      };
+      delete queryObj['createdFrom'];
+      delete queryObj['createdTo'];
+    }
     const excludedFields = ['page', 'sort', 'limit'];
     excludedFields.forEach((el) => delete queryObj[el]);
 
     let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-    this.query = this.query.find(JSON.parse(queryStr));
+
+    queryStr = queryStr.replace(
+      /\b(gte|gt|lte|lt|et)\b/g,
+      (match) => `$${match}`
+    );
+    console.log(JSON.parse(queryStr));
+    this.query = this.query.find({ ...JSON.parse(queryStr) });
     return this;
   }
 
@@ -21,7 +35,7 @@ class ApiFeatures {
       const sortBy = this.queryString.sort.split(',').join(' ');
       this.query = this.query.sort(sortBy);
     } else {
-      this.query = this.query.sort('createdAt');
+      this.query = this.query.sort('-createdAt');
     }
     return this;
   }

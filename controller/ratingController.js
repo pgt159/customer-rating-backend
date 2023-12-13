@@ -6,18 +6,18 @@ exports.setUserId = (req, res, next) => {
   // if (req.headers.)
 };
 exports.getReview = catchAsync(async (req, res, next) => {
+  if (req.user) {
+    req.query.user = req.user.id;
+  }
   const data = new ApiFeatures(RatingModel.find(), req.query)
     .filter()
     .sort()
     .paginate();
-
   const doc = await data.query;
 
   res.status(200).json({
     status: 'Success',
-    data: {
-      data: doc,
-    },
+    data: doc,
   });
 });
 
@@ -25,9 +25,7 @@ exports.createReview = catchAsync(async (req, res, next) => {
   const data = await RatingModel.create(req.body);
   res.status(201).json({
     status: 'Success',
-    data: {
-      data,
-    },
+    data,
   });
 });
 
@@ -42,8 +40,13 @@ exports.updateReview = catchAsync(async (req, res, next) => {
   }
   res.status(200).json({
     status: 'Success',
-    data: {
-      data,
-    },
+    data,
   });
+});
+
+exports.setRatingUser = catchAsync(async (req, res, next) => {
+  if (!req.body.user) {
+    req.body.user = req.user.id;
+  }
+  return next();
 });

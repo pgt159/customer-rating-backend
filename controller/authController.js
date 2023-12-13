@@ -1,25 +1,29 @@
 const User = require('../model/userModel');
-const promisify = require('util');
+const util = require('util');
 const catchAsync = require('../utils/catchAsync');
 const jwt = require('jsonwebtoken');
 const AppError = require('../utils/appError');
 
 exports.protect = catchAsync(async (req, res, next) => {
   let token;
+  console.log('cookie', req.cookie);
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
-  } else if (req.cookies.jwt) {
-    token = req.cookies.jwt;
+  } else if (req?.cookie) {
+    token = req.cookie.split('=')[1];
   }
 
   if (!token) {
     return next(new AppError('Your are not logged in', 401));
   }
 
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  const decoded = await util.promisify(jwt.verify)(
+    token,
+    process.env.JWT_SECRET
+  );
   const currentUser = await User.findById(decoded.id);
   if (!currentUser) {
     return next(
@@ -29,7 +33,6 @@ exports.protect = catchAsync(async (req, res, next) => {
       )
     );
   }
-
   if (currentUser.changedPasswordAfter(decoded.iat)) {
     return next(
       new AppError('User recently changed password! Please log in again.', 401)
@@ -37,4 +40,5 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
 
   req.user = currentUser;
+  next();
 });
