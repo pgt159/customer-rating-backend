@@ -55,7 +55,7 @@ exports.login = catchAsync(async (req, res, next) => {
   const user = await User.findOne({ userName }).select('+password');
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(
-      new AppError('Incorrect userName or password, please try again', 400)
+      new AppError('Incorrect user name or password, please try again', 400)
     );
   }
   createSendToken(user, 200, res);

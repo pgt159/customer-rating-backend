@@ -6,7 +6,6 @@ const AppError = require('../utils/appError');
 
 exports.protect = catchAsync(async (req, res, next) => {
   let token;
-  console.log('cookie', req.cookie);
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
